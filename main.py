@@ -12,6 +12,7 @@ class Product(db.Model):
     image = db.Column(db.String(200))
 
 # re create new
+# add second comments
 # create the DB on demand
 # @app.before_first_request
 # def create_tables():
