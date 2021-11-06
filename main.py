@@ -19,10 +19,12 @@ class Movie(db.Model):
     description = db.Column(db.String(500))
     cast = db.Column(db.String(400))
     timeslot = db.Column(db.String(100))
+    timeslotID = db.Column(db.Integer)
 
 class Timeslots(db.Model):
+    timeslotID = db.Column(db.Integer, primary_key=True, autoincrement=False)
     timeslot = db.Column(db.String(100))
-    availableSeat =  db.Column(db.Integer)
+    availableSeat = db.Column(db.Integer)
     bookedSeat = db.Column(db.Integer)
 
 # re create new
