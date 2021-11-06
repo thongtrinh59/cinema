@@ -8,24 +8,43 @@ db = SQLAlchemy(app)
 
 # building model
 class Cinema(db.Model):
-    id = db.Column(db.Integer, primary_key=True, autoincrement=False)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    name = db.Column(db.String(100))
     addess = db.Column(db.String(200))
     phone = db.Column(db.String(50))
     movies = db.Column(db.Integer)
+    snack = db.Column(db.String(200))
+    capacity = db.Column(db.Integer)
 
 class Movie(db.Model):
-    id = db.Column(db.Integer, primary_key=True, autoincrement=False)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     title = db.Column(db.String(200))
     description = db.Column(db.String(500))
     cast = db.Column(db.String(400))
-    timeslot = db.Column(db.String(100))
-    timeslotID = db.Column(db.Integer)
+    duration = db.Column(db.Integer)
+    # timeslot = db.Column(db.String(100))
+    # timeslotID = db.Column(db.Integer)
 
 class Timeslots(db.Model):
-    timeslotID = db.Column(db.Integer, primary_key=True, autoincrement=False)
-    timeslot = db.Column(db.String(100))
-    availableSeat = db.Column(db.Integer)
-    bookedSeat = db.Column(db.Integer)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    movieID = db.Column(db.Integer)
+    cinemaID = db.Column(db.Integer)
+    startTime = db.Column(db.String(100))
+    endTime = db.Column(db.String(100))
+    # availableSeat = db.Column(db.Integer)
+    # bookedSeat = db.Column(db.Integer)
+
+class Ticket(db.Model):
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    timeSlotID = db.Column(db.Integer)
+    typeTicket = db.Column(db.String(50))
+
+class Seats(db.Model):
+    id = id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    cinemaID =  db.Column(db.Integer)
+    status = db.Column(db.String(50))
+
+
 
 # re create new
 # add second comments
