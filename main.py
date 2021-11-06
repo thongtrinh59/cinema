@@ -41,7 +41,7 @@ class Ticket(db.Model):
 
 class Seats(db.Model):
     id = id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    cinemaID =  db.Column(db.Integer)
+    cinemaID = db.Column(db.Integer)
     status = db.Column(db.String(50))
 
 
