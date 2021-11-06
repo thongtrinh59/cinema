@@ -10,9 +10,9 @@ db = SQLAlchemy(app)
 class Cinema(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(100))
-    addess = db.Column(db.String(200))
+    address = db.Column(db.String(200))
     phone = db.Column(db.String(50))
-    movies = db.Column(db.Integer)
+    # movies = db.Column(db.Integer)
     snack = db.Column(db.String(200))
     capacity = db.Column(db.Integer)
 
@@ -20,55 +20,55 @@ class Movie(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     title = db.Column(db.String(200))
     description = db.Column(db.String(500))
-    cast = db.Column(db.String(400))
+    actors = db.Column(db.String(500))
     duration = db.Column(db.Integer)
-    # timeslot = db.Column(db.String(100))
-    # timeslotID = db.Column(db.Integer)
 
 class Timeslots(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    movieID = db.Column(db.Integer)
-    cinemaID = db.Column(db.Integer)
-    startTime = db.Column(db.String(100))
-    endTime = db.Column(db.String(100))
-    # availableSeat = db.Column(db.Integer)
-    # bookedSeat = db.Column(db.Integer)
+    mid = db.Column(db.Integer)
+    cid = db.Column(db.Integer)
+    starttime = db.Column(db.String(100))
+    endtime = db.Column(db.String(100))
 
 class Ticket(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    timeSlotID = db.Column(db.Integer)
-    typeTicket = db.Column(db.String(50))
+    timeslotid = db.Column(db.Integer)
+    typeticket = db.Column(db.String(50))
 
 class Seats(db.Model):
-    id = id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    cinemaID = db.Column(db.Integer)
+    id = id = db.Column(db.Integer, primary_key=True)
+    cid = db.Column(db.Integer)
     status = db.Column(db.String(50))
 
+# class Product(db.Model):
+#     id = db.Column(db.Integer, primary_key=True, autoincrement=False)
+#     title = db.Column(db.String(200))
+#     image = db.Column(db.String(200))
 
 
 # re create new
 # add second comments
 # create the DB on demand
-# @app.before_first_request
-# def create_tables():
-#     print("---------------------------------------")
-#     db.create_all()
-#     pro = Product(id=10, title="thwerwe", image="hhasga")
-#     db.session.add(pro)
-#     db.session.commit()
+@app.before_first_request
+def create_tables():
+    print("---------------------------------------")
+    db.create_all()
+    # pro = Product(id=10, title="thwerwe", image="hhasga")
+    # db.session.add(pro)
+    db.session.commit()
 
 
 
-hhh = db.Table('product', db.metadata, autoload=True, autoload_with=db.engine)
+# hhh = db.Table('product', db.metadata, autoload=True, autoload_with=db.engine)
 
 @app.route('/')
 def index():
     print("hello")
 
     # user1 = Product.query.all() 
-    user1 = db.session.query(hhh).all()
-    for _ in user1:
-        print(_)
+    # user1 = db.session.query(hhh).all()
+    # for _ in user1:
+    #     print(_)
 
 @app.route('/api')
 def internal():
