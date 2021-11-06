@@ -34,11 +34,12 @@ class Ticket(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     timeslotid = db.Column(db.Integer)
     typeticket = db.Column(db.String(50))
+    seat = db.Column(db.Integer)
 
-class Seats(db.Model):
-    id = id = db.Column(db.Integer, primary_key=True)
-    cid = db.Column(db.Integer)
-    status = db.Column(db.String(50))
+# class Seats(db.Model):
+#     id = id = db.Column(db.Integer, primary_key=True)
+#     cid = db.Column(db.Integer)
+#     status = db.Column(db.String(50))
 
 # class Product(db.Model):
 #     id = db.Column(db.Integer, primary_key=True, autoincrement=False)
