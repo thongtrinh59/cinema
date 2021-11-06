@@ -6,10 +6,24 @@ app.config["SQLALCHEMY_DATABASE_URI"] = 'postgresql://root:root@db/main'
 
 db = SQLAlchemy(app)
 
-class Product(db.Model):
+# building model
+class Cinema(db.Model):
+    id = db.Column(db.Integer, primary_key=True, autoincrement=False)
+    addess = db.Column(db.String(200))
+    phone = db.Column(db.String(50))
+    movies = db.Column(db.Integer)
+
+class Movie(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=False)
     title = db.Column(db.String(200))
-    image = db.Column(db.String(200))
+    description = db.Column(db.String(500))
+    cast = db.Column(db.String(400))
+    timeslot = db.Column(db.String(100))
+
+class Timeslots(db.Model):
+    timeslot = db.Column(db.String(100))
+    availableSeat =  db.Column(db.Integer)
+    bookedSeat = db.Column(db.Integer)
 
 # re create new
 # add second comments
