@@ -45,45 +45,69 @@ class Ticket(db.Model):
     typeticket = db.Column(db.String(50))
     seat = db.Column(db.Integer)
 
-# Get available cinemas
+# # Get available cinemas
+# @app.route('/cinema')
+# def get_avai_cinema():
+#     parser = reqparse.RequestParser()
+#     parser.add_argument('status', type=str,  required=True, help='Status cannot be blank')
+    
+#     args = parser.parse_args()
+#     print(args)
+#     list_of_result = []
+
+#     if args['status'] == 'available':
+#         avai_cinema = Cinema.query.all()
+#         for _ in avai_cinema:
+#             print(_.name)
+#             dict_result = {
+#                 "id": _.id,
+#                 "name": _.name,
+#                 "address": _.address,
+#                 "phone": _.phone,
+#                 "snack": _.snack,
+#                 "capacity": _.capacity
+#             }
+            
+#             # dict_result = json.dumps(dict_result)
+#             # print(dict_result)
+#             list_of_result.append(dict_result)
+
+#     # with engine.connect() as con:
+
+#     #     rs = con.execute('SELECT * FROM cinema;')
+
+#     #     for row in rs:
+#     #         print(row.id)
+    
+#     # list_of_result = json.dumps(list_of_result)
+    
+    
+#     return {'return': list_of_result}, 200
+
+
+# Get cinema information
 @app.route('/cinema')
-def get_avai_cinema():
+def get_info_cinema():
     parser = reqparse.RequestParser()
-    parser.add_argument('status', type=str,  required=True, help='Status cannot be blank')
+    parser.add_argument('name', action='append', type=str,  required=True, help='Name cannot be blank')
     
     args = parser.parse_args()
     print(args)
+
     list_of_result = []
+    # for name in args['name']:
+    #     info_cinema = Cinema.query.filter_by(name=name).first()
+    #     dict_result = {
+    #         "id": info_cinema.id,
+    #         "name": info_cinema.name,
+    #         "address": info_cinema.address,
+    #         "phone": info_cinema.phone,
+    #         "snack": info_cinema.snack,
+    #         "capacity": info_cinema.capacity
+    #     }
+    #     list_of_result.append(dict_result)
 
-    if args['status'] == 'available':
-        avai_cinema = Cinema.query.all()
-        for _ in avai_cinema:
-            print(_.name)
-            dict_result = {
-                "id": _.id,
-                "name": _.name,
-                "address": _.address,
-                "phone": _.phone,
-                "snack": _.snack,
-                "capacity": _.capacity
-            }
-            
-            # dict_result = json.dumps(dict_result)
-            # print(dict_result)
-            list_of_result.append(dict_result)
-
-    # with engine.connect() as con:
-
-    #     rs = con.execute('SELECT * FROM cinema;')
-
-    #     for row in rs:
-    #         print(row.id)
-    
-    # list_of_result = json.dumps(list_of_result)
-    
-    
-    return {'return': list_of_result}, 200
-
+    return {'result': list_of_result}, 200
 
 
 
