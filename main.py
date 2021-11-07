@@ -9,6 +9,8 @@ from sqlalchemy import create_engine
 from sqlalchemy import Table, Column, Integer, String, MetaData, ForeignKey
 from sqlalchemy import inspect
 from sqlalchemy.orm import sessionmaker
+import copy
+
 
 import json
 
@@ -186,15 +188,43 @@ def find_available_ticket(moviename):
             count += 1
             temp_str = _.name + "++++" + _.typeticket
             if temp_str not in set_of_tuple:
+                set_of_tuple.add(temp_str)
                 temp_dict[temp_str] = 1
             else:
                 temp_dict[temp_str] += 1
-
+        temp_list = []
+        new_dict = {}
         for item in temp_dict.items():
-            print(item)
+            str_split = item[0].split("++++")
+            new_str = str_split[1] + "++++" + str(item[1])
+
+            if str_split[0] not in new_dict.keys():
+                new_dict[str_split[0]] = [new_str]
+
+            else:
+                new_dict[str_split[0]].append(new_str)
 
 
-    return {'return': count}, 200
+        gg = []
+        for item in new_dict.items():
+            hh_dict = {}
+            tt_dict = {}
+            for j in item[1]:
+                str_split = j.split("++++")
+                tt_dict[str_split[0]] = int(str_split[1])
+
+            hh_dict['name'] = item[0]
+            hh_dict['ticket'] = tt_dict
+            gg.append(hh_dict)
+
+        final = {}
+
+        final["total available"] = count
+        final["time slot"] = [startTime, endTime]
+        final["cinema"] = gg
+            
+
+    return {'return': final}, 200
 
 
 # @app.before_first_request
