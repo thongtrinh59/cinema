@@ -50,11 +50,11 @@ class Ticket(db.Model):
     seat = db.Column(db.Integer)
 
 # Get available cinemas
-@app.route('/cinema')
+@app.route('/cinemas')
 def get_avai_cinema():
     parser = reqparse.RequestParser()
     parser.add_argument('status', type=str,  required=False)
-    parser.add_argument('name', type=str,  required=False)
+    # parser.add_argument('name', type=str,  required=False)
     parser.add_argument('movie_title', type=str,  required=False)
     
     args = parser.parse_args()
@@ -79,29 +79,8 @@ def get_avai_cinema():
 
         return {'return': list_of_avai_cinema}, 200
 
-    # get cinema infotmation by name
-    if args['name'] is not None:
-        list_cinema_by_name = []
-        # for _ in args['name']:
-        with engine.connect() as con:
-            q_str = "SELECT * FROM cinema WHERE name = '{}';".format(args['name'])
-            rs = con.execute(q_str)
-
-            for _ in rs:
-                dict_result = {
-                    "id": _.id,
-                    "name": _.name,
-                    "address": _.address,
-                    "phone": _.phone,
-                    "snack": _.snack,
-                    "capacity": _.capacity
-                }
-                list_cinema_by_name.append(dict_result)
-        return {'return': list_cinema_by_name}, 200
-
     # search cinemas by movie title
     if args['movie_title'] is not None:
-        print("OKKKKKKKKKK")
         result = []
         with engine.connect() as con:
             q_str = "SELECT DISTINCT(c.name) FROM movie as m,  \
@@ -114,44 +93,45 @@ def get_avai_cinema():
         print(result)
         return {'result': result}, 200
         
-@app.route('/cinema/<name>')
-def lihat_profile(name):
-    return {'return': name}, 200
+@app.route('/cinemas/<cinemaname>')
+def get_info_cinema(cinemaname):
+    list_cinema_by_name = []
+    # for _ in args['name']:
+    with engine.connect() as con:
+        q_str = "SELECT * FROM cinema WHERE LOWER(name) = LOWER('{}');".format(cinemaname)
+        rs = con.execute(q_str)
+        for _ in rs:
+            dict_result = {
+                "id": _.id,
+                "name": _.name,
+                "address": _.address,
+                "phone": _.phone,
+                "snack": _.snack,
+                "capacity": _.capacity
+            }
+            list_cinema_by_name.append(dict_result)
+    return {'return': list_cinema_by_name}, 200
+    # return {'return': cinemaname}, 200
 
+@app.route('/cinemas/movies')
+def find_now_showing_movie():
+    parser = reqparse.RequestParser()
+    parser.add_argument('status', type=str, required=False)
+    args = parser.parse_args()
+    print(args['status'])
 
-# # Get available cinemas
-# @app.route('/cinema')
-# def get_avai_cinema():
-#     parser = reqparse.RequestParser()
-#     parser.add_argument('status', type=str,  required=False, help='Status cannot be blank')
-    
-#     args = parser.parse_args()
-#     print(args)
-#     list_of_result = []
-
-#     if args['status'] == 'available':
-#         avai_cinema = Cinema.query.all()
-#         for _ in avai_cinema:
-#             print(_.name)
-#             dict_result = {
-#                 "id": _.id,
-#                 "name": _.name,
-#                 "address": _.address,
-#                 "phone": _.phone,
-#                 "snack": _.snack,
-#                 "capacity": _.capacity
-#             }
-            
-#             # dict_result = json.dumps(dict_result)
-#             # print(dict_result)
-#             list_of_result.append(dict_result)
-
-    
-    
-#     return {'return': list_of_result}, 200
-
-
-
+    if args['status'] == 'now showing':
+        with engine.connect() as con:
+            q_str = "SELECT c.name, m.title FROM movie as m,  \
+                timeslots as t, cinema as c WHERE m.id = t.mid AND c.id = t.cid;"
+            rs = con.execute(q_str)
+            dict_result = {}
+            for _ in rs:
+                if _.name not in dict_result.keys():
+                    dict_result[_.name] = []
+                else:
+                    dict_result[_.name].append(_.title)
+    return {'return': dict_result}
 
 
 
