@@ -59,7 +59,7 @@ def get_avai_cinema():
     
     args = parser.parse_args()
     print(args)
-
+    # get all avalable cinemas
     if args['status'] is not None:
         list_of_avai_cinema = []
 
@@ -77,35 +77,29 @@ def get_avai_cinema():
                 }
                 list_of_avai_cinema.append(dict_result)
 
-        # avai_cinema = Cinema.query.all()
-        # for _ in avai_cinema:
-        #     dict_result = {
-        #         "id": _.id,
-        #         "name": _.name,
-        #         "address": _.address,
-        #         "phone": _.phone,
-        #         "snack": _.snack,
-        #         "capacity": _.capacity
-        #     }
-        #     list_of_avai_cinema.append(dict_result)
-
         return {'return': list_of_avai_cinema}, 200
 
+    # get cinema infotmation by name
     if args['name'] is not None:
         list_cinema_by_name = []
         # for _ in args['name']:
-        cinema_by_name = Cinema.query.filter_by(name=args['name']).first()
-        dict_result = {
-            "id": cinema_by_name.id,
-            "name": cinema_by_name.name,
-            "address": cinema_by_name.address,
-            "phone": cinema_by_name.phone,
-            "snack": cinema_by_name.snack,
-            "capacity": cinema_by_name.capacity
-        }
-        list_cinema_by_name.append(dict_result)
+        with engine.connect() as con:
+            q_str = "SELECT * FROM cinema WHERE name = '{}';".format(args['name'])
+            rs = con.execute(q_str)
+
+            for _ in rs:
+                dict_result = {
+                    "id": _.id,
+                    "name": _.name,
+                    "address": _.address,
+                    "phone": _.phone,
+                    "snack": _.snack,
+                    "capacity": _.capacity
+                }
+                list_cinema_by_name.append(dict_result)
         return {'return': list_cinema_by_name}, 200
 
+    # search cinemas by movie title
     if args['movie_title'] is not None:
         print("OKKKKKKKKKK")
         result = []
@@ -120,8 +114,9 @@ def get_avai_cinema():
         print(result)
         return {'result': result}, 200
         
-        
-
+@app.route('/cinema/<name>')
+def lihat_profile(name):
+    return {'return': name}, 200
 
 
 # # Get available cinemas
