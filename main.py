@@ -1,10 +1,20 @@
 from flask import Flask, jsonify, abort
 from flask_sqlalchemy import SQLAlchemy
+from flask_restx import Resource, Api
+from flask_restx import fields
+from flask_restx import inputs
+from flask_restx import reqparse
+import sqlalchemy
+from sqlalchemy import create_engine
+from sqlalchemy import Table, Column, Integer, String, MetaData, ForeignKey
+from sqlalchemy import inspect
+import json
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = 'postgresql://root:root@db/main'
 
 db = SQLAlchemy(app)
+engine = create_engine('postgresql://root:root@db/main')
 
 # building model
 class Cinema(db.Model):
@@ -12,7 +22,6 @@ class Cinema(db.Model):
     name = db.Column(db.String(100))
     address = db.Column(db.String(200))
     phone = db.Column(db.String(50))
-    # movies = db.Column(db.Integer)
     snack = db.Column(db.String(200))
     capacity = db.Column(db.Integer)
 
@@ -36,27 +45,45 @@ class Ticket(db.Model):
     typeticket = db.Column(db.String(50))
     seat = db.Column(db.Integer)
 
-# class Seats(db.Model):
-#     id = id = db.Column(db.Integer, primary_key=True)
-#     cid = db.Column(db.Integer)
-#     status = db.Column(db.String(50))
+# Get available cinemas
+@app.route('/cinema')
+def get_avai_cinema():
+    parser = reqparse.RequestParser()
+    parser.add_argument('status', type=str,  required=True, help='Status cannot be blank')
+    
+    args = parser.parse_args()
+    print(args)
+    list_of_result = []
 
-# class Product(db.Model):
-#     id = db.Column(db.Integer, primary_key=True, autoincrement=False)
-#     title = db.Column(db.String(200))
-#     image = db.Column(db.String(200))
+    if args['status'] == 'available':
+        avai_cinema = Cinema.query.all()
+        for _ in avai_cinema:
+            print(_.name)
+            dict_result = {
+                "id": _.id,
+                "name": _.name,
+                "address": _.address,
+                "phone": _.phone,
+                "snack": _.snack,
+                "capacity": _.capacity
+            }
+            
+            # dict_result = json.dumps(dict_result)
+            # print(dict_result)
+            list_of_result.append(dict_result)
 
+    # with engine.connect() as con:
 
-# re create new
-# add second comments
-# create the DB on demand
-@app.before_first_request
-def create_tables():
-    print("---------------------------------------")
-    db.create_all()
-    # pro = Product(id=10, title="thwerwe", image="hhasga")
-    # db.session.add(pro)
-    db.session.commit()
+    #     rs = con.execute('SELECT * FROM cinema;')
+
+    #     for row in rs:
+    #         print(row.id)
+    
+    # list_of_result = json.dumps(list_of_result)
+    
+    
+    return {'return': list_of_result}, 200
+
 
 
 
