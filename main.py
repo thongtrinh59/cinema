@@ -48,6 +48,7 @@ class Ticket(db.Model):
     timeslotid = db.Column(db.Integer)
     typeticket = db.Column(db.String(50))
     seat = db.Column(db.Integer)
+    status = db.Column(db.String)
 
 # Get available cinemas
 @app.route('/cinemas')
@@ -134,6 +135,73 @@ def find_now_showing_movie():
     return {'return': dict_result}
 
 
+@app.route('/movies/<moviename>/timeslots')
+def find_available_ticket(moviename):
+    parser = reqparse.RequestParser()
+    parser.add_argument('status', type=str, required=False)
+    parser.add_argument('starttime', type=str, required=False)
+    parser.add_argument('endtime', type=str, required=False)
+
+    args = parser.parse_args()
+
+    ticket_status = args['status']
+    startTime = args['starttime']
+    endTime = args['endtime']
+
+    # return {'return': [ticket_status, startTime, endTime]}, 200
+
+    with engine.connect() as con:
+        q_str = "SELECT c.name, m.title, t.starttime, t.endtime, tk.seat, tk.status, \
+                    tk.typeticket FROM movie as m, timeslots as t, cinema as c, ticket as tk  \
+                    WHERE m.id = t.mid AND c.id = t.cid AND t.id = tk.timeslotid \
+                    AND tk.status = '{}' AND LOWER(m.title) = LOWER('{}') \
+                    AND t.starttime = '{}' AND t.endtime = '{}';".format(ticket_status,
+                    moviename, startTime, endTime)
+        rs = con.execute(q_str)
+
+        # count = 0
+        # for _ in rs:
+        #     count += 1
+        # print(count)
+
+        # movie_dict = {}
+        # for _ in rs:
+        #     if "total available" not in movie_dict.keys():
+        #         movie_dict["total available"] = 0
+        #     else:
+        #         movie_dict["total available"] += 1
+
+        #     if "time slots" not in movie_dict.keys():
+        #         movie_dict["time slots"] = [startTime, endTime]
+
+        #     if "cinema" not in movie_dict.keys():
+        #         movie_dict["cinema"] = []
+        #     # else:
+        #     #     movie_dict["cinema"]["name"] = _.name
+
+        count = 0
+        set_of_tuple = set()
+        temp_dict = {} 
+        for _ in rs:
+            count += 1
+            temp_str = _.name + "++++" + _.typeticket
+            if temp_str not in set_of_tuple:
+                temp_dict[temp_str] = 1
+            else:
+                temp_dict[temp_str] += 1
+
+        for item in temp_dict.items():
+            print(item)
+
+
+    return {'return': count}, 200
+
+
+# @app.before_first_request
+# def create_tables():
+#     print("---------------------------------------")
+#     db.create_all()
+#     db.session.commit()
 
 
 if __name__ == '__main__':
