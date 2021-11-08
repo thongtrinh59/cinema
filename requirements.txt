@@ -8,3 +8,4 @@ requests==2.25.0
 mysqlclient==2.0.1
 pika==1.1.0
 psycopg2-binary==2.8.6
+flask_restx==0.5.1
