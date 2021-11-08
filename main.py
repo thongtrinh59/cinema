@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, abort
+from flask import Flask, jsonify, abort, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_restx import Resource, Api
 from flask_restx import fields
@@ -10,7 +10,7 @@ from sqlalchemy import Table, Column, Integer, String, MetaData, ForeignKey
 from sqlalchemy import inspect
 from sqlalchemy.orm import sessionmaker
 import copy
-
+import requests
 
 import json
 
@@ -151,9 +151,10 @@ def find_available_ticket(moviename):
     endTime = args['endtime']
 
     # return {'return': [ticket_status, startTime, endTime]}, 200
-
+    # nn = request.args.get('status')
+    # print("this is a status", nn)
     with engine.connect() as con:
-        q_str = "SELECT c.name, m.title, t.starttime, t.endtime, tk.seat, tk.status, \
+        q_str = "SELECT c.name, m.title, t.starttime, t.endtime, t.id, tk.seat, tk.status, \
                     tk.typeticket FROM movie as m, timeslots as t, cinema as c, ticket as tk  \
                     WHERE m.id = t.mid AND c.id = t.cid AND t.id = tk.timeslotid \
                     AND tk.status = '{}' AND LOWER(m.title) = LOWER('{}') \
@@ -161,38 +162,20 @@ def find_available_ticket(moviename):
                     moviename, startTime, endTime)
         rs = con.execute(q_str)
 
-        # count = 0
-        # for _ in rs:
-        #     count += 1
-        # print(count)
-
-        # movie_dict = {}
-        # for _ in rs:
-        #     if "total available" not in movie_dict.keys():
-        #         movie_dict["total available"] = 0
-        #     else:
-        #         movie_dict["total available"] += 1
-
-        #     if "time slots" not in movie_dict.keys():
-        #         movie_dict["time slots"] = [startTime, endTime]
-
-        #     if "cinema" not in movie_dict.keys():
-        #         movie_dict["cinema"] = []
-        #     # else:
-        #     #     movie_dict["cinema"]["name"] = _.name
-
         count = 0
         set_of_tuple = set()
         temp_dict = {} 
+        # ts_id_set = set()
         for _ in rs:
             count += 1
-            temp_str = _.name + "++++" + _.typeticket
+            # ts_id_set.add(_.id)
+            temp_str = _.name + "****" + str(_.id) + "++++" + _.typeticket
             if temp_str not in set_of_tuple:
                 set_of_tuple.add(temp_str)
                 temp_dict[temp_str] = 1
             else:
                 temp_dict[temp_str] += 1
-        temp_list = []
+        # temp_list = []
         new_dict = {}
         for item in temp_dict.items():
             str_split = item[0].split("++++")
@@ -204,7 +187,6 @@ def find_available_ticket(moviename):
             else:
                 new_dict[str_split[0]].append(new_str)
 
-
         gg = []
         for item in new_dict.items():
             hh_dict = {}
@@ -213,18 +195,77 @@ def find_available_ticket(moviename):
                 str_split = j.split("++++")
                 tt_dict[str_split[0]] = int(str_split[1])
 
-            hh_dict['name'] = item[0]
+            jjj = item[0].split("****")    
+
+            hh_dict['name'] = jjj[0]
+            hh_dict['time slot id'] = int(jjj[1])
             hh_dict['ticket'] = tt_dict
             gg.append(hh_dict)
 
         final = {}
-
+        final["movie name"] = moviename
         final["total available"] = count
         final["time slot"] = [startTime, endTime]
         final["cinema"] = gg
             
 
     return {'return': final}, 200
+
+@app.route('/cinemas/<cinemaname>/snacks')
+def find_snack_in_cinea(cinemaname):
+    print(cinemaname)
+    
+    with engine.connect() as con:
+        q_str = "SELECT snack FROM cinema WHERE LOWER(name) = LOWER('{}')".format(cinemaname)
+        rs = con.execute(q_str)
+        for _ in rs:
+            snack_str = _.snack
+            snack_list = snack_str.split(", ")
+            
+    return {"return": snack_list}, 200
+
+@app.route('/timeslots/<timeslotsid>/order', methods=['POST'])
+def order_ticket(timeslotsid):
+
+    if request.method == 'POST':
+        request_data = request.get_json()
+        print(request_data)
+
+        ticket_type = request_data["ticket type"]
+        num_ticket = request_data["number of tickets"]
+        timeslotID = request_data["timeslotID"]
+
+        with engine.connect() as con:
+            q_str = "SELECT tk.id AS tkid, tk.seat, tk.status, tk.typeticket, t.id FROM timeslots as t, ticket as tk \
+                        WHERE t.id = tk.timeslotid AND t.id = {} AND tk.status = 'available' \
+                        AND tk.typeticket = '{}';".format(timeslotID, ticket_type)
+            rs = con.execute(q_str)
+            temp_list = []
+            for _ in rs:
+                temp_list.append((_.seat, _.tkid))
+            new_list = temp_list[0:num_ticket]
+
+            for id2 in new_list:
+                q_str2 = "UPDATE ticket SET status = 'booked' WHERE seat = {};".format(id2[0])
+                con.execute(q_str2)
+            return_tkid = []
+            for _ in new_list:
+                return_tkid.append(_[1])
+
+        print(return_tkid)
+        headers = {'Content-Type' : 'application/json'}
+        rt_body = json.dumps({"ticket ID": return_tkid, "username": request_data['username']})
+        res = requests.post("http://booking_booking_1:5000/timeslots/<{}>/orderUpdate".format(timeslotID), data=rt_body, headers=headers)
+
+
+
+
+
+# internal api
+
+
+
+
 
 
 # @app.before_first_request

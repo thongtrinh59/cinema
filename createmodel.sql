@@ -1,0 +1,1 @@
+INSERT INTO cinema(name, address, phone, movies, snack, capacity) VALUES ('Event cinema', '313 Geogre Street', 1, 'pop corn, coke, smoothie, chips, coffe, sparkling, ice cream', 300);
