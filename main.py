@@ -224,6 +224,7 @@ def find_snack_in_cinea(cinemaname):
             
     return {"return": snack_list}, 200
 
+# internal api
 @app.route('/timeslots/<timeslotsid>/order', methods=['POST'])
 def order_ticket(timeslotsid):
 
@@ -257,15 +258,38 @@ def order_ticket(timeslotsid):
         rt_body = json.dumps({"ticket ID": return_tkid, "username": request_data['username']})
         res = requests.post("http://booking_booking_1:5000/timeslots/<{}>/orderUpdate".format(timeslotID), data=rt_body, headers=headers)
 
+    return 200
 
+# cancel order
+@app.route('/timeslots/<timeslotsid>/orderCancel', methods = ['POST'])
+def cancel_ticket(timeslotsid):
+    if request.method == 'POST':
+        request_data = request.get_json()
+        print(request_data)
 
+        ticket_type = request_data["ticket type"]
+        num_ticket = request_data["number of tickets"]
+        timeslotID = request_data["timeslotID"]
 
+        with engine.connect() as con:
+            q_str = "SELECT tk.id AS tkid, tk.seat, tk.status, tk.typeticket, t.id FROM timeslots as t, ticket as tk \
+                        WHERE t.id = tk.timeslotid AND t.id = {} AND tk.status = 'booked' \
+                        AND tk.typeticket = '{}';".format(timeslotID, ticket_type)
+            rs = con.execute(q_str)
+            temp_list = []
+            for _ in rs:
+                temp_list.append((_.seat, _.tkid))
+            new_list = temp_list[0:num_ticket]
+            for id2 in new_list:
+                q_str2 = "UPDATE ticket SET status = 'available' WHERE seat = {};".format(id2[0])
+                con.execute(q_str2)
+                print('DELETED SUCCESS')
 
-# internal api
-
-
-
-
+        # headers = {'Content-Type' : 'application/json'}
+        # rt_body = json.dumps({"return": "ok"})
+        # res = requests.post("http://booking_booking_1:5000/timeslots/<{}>/orderCancel".format(timeslotID), data=rt_body, headers=headers)
+        print('RETURN OK')
+        return {"return": "ok"}, 200
 
 
 # @app.before_first_request
